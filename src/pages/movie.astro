@@ -1,0 +1,121 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+    <form id="form" class="bg-white p-5 rounded-lg shadow-md mb-5">
+        <label for="timestamp" class="block mb-2 font-bold"
+            >Movie Timestamp-to-time:</label
+        >
+        <input
+            type="text"
+            id="timestampForm"
+            pattern="^(([0:9]+:)?([0-9]+:)?([0-9]+)$"
+            title="SS, or MM:SS, or HH:MM:SS (0 <= SS, MM < 60)"
+            placeholder="hh:mm:ss"
+            class="w-full p-2 mb-4 border border-gray-300 rounded"
+        />
+
+        <label for="droptime" class="block mb-2 font-bold">Drop time:</label>
+        <input
+            type="datetime-local"
+            name="droptime"
+            id="droptimeForm"
+            step="1"
+            class="w-full p-2 mb-4 border border-gray-300 rounded"
+        />
+
+        <button
+            type="submit"
+            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >Set Settings</button
+        >
+    </form>
+
+    <div id="setting" class="bg-gray-100 p-4 rounded-lg mb-4">
+        Enter settings above!
+    </div>
+    <div id="result" class="bg-gray-100 p-4 rounded-lg mb-4"></div>
+    <div id="current" class="bg-gray-100 p-4 rounded-lg">
+        Your current time is <span id="currentTime">[Waiting to Update]</span>.
+        <span id="movieTime"></span>
+    </div>
+
+    <script>
+        const form = document.getElementById("form");
+        const setting = document.getElementById("setting");
+        const result = document.getElementById("result");
+
+        let ts, dt, st;
+
+        const defaultDate = new Date();
+        const timezoneOffset = defaultDate.getTimezoneOffset() / 60;
+        defaultDate.setHours(-timezoneOffset, 0, 0, 0);
+        defaultDate.setDate(defaultDate.getDate() + 1);
+        document.getElementById("droptimeForm").value = defaultDate
+            .toISOString()
+            .slice(0, 19);
+
+        form?.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const timestamp = document.getElementById("timestampForm").value;
+            const dropTime = document.getElementById("droptimeForm").value;
+
+            if (!timestamp || !dropTime) {
+                alert("Please enter a timestamp and a drop time.");
+                return;
+            }
+
+            const parts = timestamp.split(":");
+            let seconds = 0;
+            for (let i = 0; i < parts.length; i++) {
+                seconds +=
+                    parseInt(parts[i]) * Math.pow(60, parts.length - i - 1);
+            }
+
+            const formattedTimestamp = new Date(seconds * 1000)
+                .toISOString()
+                .substr(11, 8);
+
+            setting.innerHTML = `Timing movie timestamp of ${formattedTimestamp} at ${dropTime}`;
+
+            const dropDate = new Date(dropTime);
+            const startDate = new Date(dropDate.getTime() - seconds * 1000);
+
+            result.innerHTML = `Start time: ${startDate.toLocaleString()}`;
+
+            ts = seconds;
+            dt = dropDate;
+            st = startDate;
+        });
+
+        setInterval(() => {
+            const currentTime = new Date();
+            const currentTimeElement = document.getElementById("currentTime");
+            currentTimeElement.innerHTML = currentTime.toLocaleString();
+
+            const movieTimeElement = document.getElementById("movieTime");
+            const startTime = new Date(st);
+            const curTime = new Date(currentTime);
+
+            const diff = curTime.getTime() - startTime.getTime();
+
+            if (!Number.isNaN(diff)) {
+                const negative = diff < 0;
+                let timeDiff = Math.floor(Math.abs(diff) / 1000);
+                if (negative) timeDiff++;
+                const hours = Math.floor(timeDiff / 3600);
+                let minutes = Math.floor((timeDiff % 3600) / 60);
+                if (minutes < 10) minutes = "0" + minutes;
+                let seconds = timeDiff % 60;
+                if (seconds < 10) seconds = "0" + seconds;
+
+                const formattedDiff = `${hours}:${minutes}:${seconds}`;
+                if (negative)
+                    movieTimeElement.innerHTML = `You should start your movie in ${formattedDiff}.`;
+                else
+                    movieTimeElement.innerHTML = `Your current movie time should be ${formattedDiff}.`;
+            } else movieTimeElement.innerHTML = "";
+        }, 50);
+    </script>
+</Layout>

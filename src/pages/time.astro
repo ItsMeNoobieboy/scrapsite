@@ -1,0 +1,82 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Column from "../components/TZColumn.astro";
+---
+
+<Layout>
+    <h1>Time</h1>
+
+    <button id="button">Add Time Zone</button>
+
+    <div id="time"></div>
+
+    <div class="bg-gray-300 p-6 text-center rounded font-bold min-w-80">
+        <input
+            type="datetime-local"
+            name="droptime"
+            size="30"
+            step="1"
+            class="droptimeForm bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+        />
+
+        <input
+            name="timezone"
+            placeholder="Time zone"
+            size="30"
+            list="timezones"
+            class="timezoneForm bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+        />
+
+        <datalist id="timezones">
+            {
+                Intl.supportedValuesOf("timeZone").map((tz) => (
+                    <option value={tz} />
+                ))
+            }
+        </datalist>
+    </div>
+
+    <div id="columns" class="grid grid-cols-4 gap-4"></div>
+
+    <script>
+        console.log("something happened here");
+        let columns = 0;
+
+        let time = new Date();
+
+        function addTimeZone() {
+            columns++;
+            const columnsDiv = document.getElementById("columns");
+            const newColumn = document.createElement("div");
+            newColumn.className = "column";
+            newColumn.innerHTML = `<div class="bg-gray-300 p-6 text-center rounded font-bold min-w-80">Column ${columns}</div>`;
+            columnsDiv?.appendChild(newColumn);
+            if (columnsDiv) columnsDiv.style.columns = `${columns}`;
+        }
+        console.log("something happened here2");
+
+        const addButton = document.getElementById("button");
+        if (addButton) addButton.addEventListener("click", addTimeZone);
+
+        // Update div ids with their timezone
+        
+        setInterval(() => {
+            time = new Date();
+            const timeElement = document.getElementById("time");
+            if (timeElement) {
+                timeElement.innerHTML = time.toLocaleTimeString();
+            }
+            
+        }, 50);
+    </script>
+</Layout>
+
+<!-- <form>
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" />
+
+    <label for="time">Time:</label>
+    <input type="time" id="time" name="time" />
+
+    <button type="submit">Convert</button>
+</form> -->
