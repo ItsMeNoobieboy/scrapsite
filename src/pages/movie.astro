@@ -10,8 +10,8 @@ import Layout from "../layouts/Layout.astro";
         <input
             type="text"
             id="timestampForm"
-            pattern="^(([0:9]+:)?([0-9]+:)?([0-9]+)$"
-            title="SS, or MM:SS, or HH:MM:SS (0 <= SS, MM < 60)"
+            pattern="^(([0-9]+:)?[0-9]+:)?[0-9]+$"
+            title="SS, or MM:SS, or HH:MM:SS"
             placeholder="hh:mm:ss"
             class="w-full p-2 mb-4 border border-gray-300 rounded"
         />
@@ -73,9 +73,13 @@ import Layout from "../layouts/Layout.astro";
                     parseInt(parts[i]) * Math.pow(60, parts.length - i - 1);
             }
 
-            const formattedTimestamp = new Date(seconds * 1000)
-                .toISOString()
-                .substr(11, 8);
+            const hours = Math.floor(seconds / 3600);
+            let minutes = Math.floor((seconds % 3600) / 60);
+            if (minutes < 10) minutes = "0" + minutes;
+            let secs = seconds % 60;
+            if (secs < 10) secs = "0" + secs;
+
+            const formattedTimestamp = `${hours}:${minutes}:${secs}`;
 
             setting.innerHTML = `Timing movie timestamp of ${formattedTimestamp} at ${dropTime}`;
 
