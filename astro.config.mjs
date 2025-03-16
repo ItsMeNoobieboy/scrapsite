@@ -6,8 +6,7 @@ import svelte from '@astrojs/svelte';
 
 // https://astro.build/config
 export default defineConfig({
-    site: "https://itsmenoobieboy.github.io",
-    base: "scrapsite",
+    site: "https://scrapsite.yanchengzhao.com",
 
     vite: {
         plugins: [tailwindcss()],
